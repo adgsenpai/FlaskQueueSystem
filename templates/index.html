@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Progress</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        progress {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<button onclick="startTask()">Start Task</button>
+<br><br>
+<progress id="progressBar" value="0" max="100"></progress>
+<span id="percent">0%</span>
+
+<script>
+    function updateProgress(jobId) {
+        fetch(`/task_status/${jobId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("progressBar").value = data.progress;
+                document.getElementById("percent").innerText = `${data.progress}%`;
+
+                if (data.status == "finished") {
+                    alert("Task completed!");
+                } else if (data.status == "failed") {
+                    alert("Task failed!");
+                } else {
+                    setTimeout(function() {
+                        updateProgress(jobId);
+                    }, 2000);
+                }
+            });
+    }
+
+    function startTask() {
+        fetch('/start_task')
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                updateProgress(data.job_id);
+            });
+    }
+</script>
+
+</body>
+</html>
